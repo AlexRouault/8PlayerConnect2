@@ -90,12 +90,24 @@ class AI:
                         break
                 except IndexError:
                     pass
-
+        #....
+            
         c.execute("SELECT column0, column1, column2, column3, column4, column5, column6 FROM beads WHERE gameboard = ?;", (moves_code,))
         data = c.fetchone()
+        
+        #If the moves_code does not exist in the DB (AI has not ever seen this gamestate), create
+        # a new row in the DB with a moves_code corresponding to the current gamestate, and insert
+        # the default number of beads into each column of this new row. Then, select a random
+        # column to play in.
         if not data:
             c.execute("INSERT INTO beads (gameboard) VALUES (?)", (moves_code,))
-            return random.randint(0,6)
+            play = random.randint(0,6)
+            self.mymoves.append((moves_code, play))
+            return play
+        #....
+
+        #If the moves_code exists in the DB, select a random bead from the row, and play in its
+        # column
         else:
             selection = random.randrange(sum(data))
             for column in range(7):
@@ -103,6 +115,7 @@ class AI:
                 if selection < 0:
                     return column
             raise Exception("We fucked up here!")
+        #....
         
             
 

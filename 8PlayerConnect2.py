@@ -1,5 +1,6 @@
 import sqlite3
 import random
+import copy
 
 class Connect2:
 
@@ -19,16 +20,16 @@ class Connect2:
         return rep
 
     def get_board(self):
-        return self.board
+        return copy.deepcopy(self.board)
 
     def play(self, row):
         char = str(self.current_player)
         for i in range(6):
             if self.board[row][i] == " ":
                 self.board[row][i] = char
+                self.current_player = (self.current_player % 8) + 1
                 return self.is_won()
         raise ValueError("Row Full!")
-        self.current_player = (self.current_player % 8) + 1
 
     def is_won(self):
         for col in range(7):
@@ -41,9 +42,6 @@ class Connect2:
                 else:
                     break
         return False
-
-    def get_gamestate(self):
-        return self.board
 
 
     def adj(self, row, col):
@@ -84,7 +82,7 @@ class AI:
             for col in range(7):
                 try:
                     if gameboard[col][0] == str(current):
-                        moves_code.append(gameboard[col].pop())
+                        moves_code += gameboard[col].pop()
                         current = (current % 8) + 1
                         empty = False
                         break
@@ -127,7 +125,7 @@ def gameplay():
     while not game.is_won():
         game.play(players[(player - 1) % 8].play(conn, game.get_board()))
         player = (player % 8) + 1
-        print(".", end = "")
+        print(game.get_board())
     conn.commit()
     conn.close()
     
